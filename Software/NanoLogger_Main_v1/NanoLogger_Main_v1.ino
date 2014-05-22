@@ -2,15 +2,15 @@
  
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- ////////*** NANO LOGGER CODE ***///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ ////////*** NANO LOGGER CODE ***////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
- // Miguel Gandra // m3gandra@gmail.com ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+ // Miguel Gandra // m3gandra@gmail.com /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  
   
   
   //Mode1 - if the button is clicked, it starts immediately
-  //Mode2 - if the button is pushed (by the pushtime choosen) the logger only begins collecting data in the Start Date
+  //Mode2 - if the button is pushed the logger only begins collecting data in the chosen StartTime
  
   //Definable sampling rate, duration, frequency and start time
   //Ability to set up the logger via parameters saved on a text file in the MicroSD card
@@ -19,7 +19,6 @@
   //Error function with visual feedback through the red LED
   //Improved autonomy achieved using sleep functions
   //Arduino ID stored on EEPROM
- 
  
  
 
@@ -48,7 +47,7 @@
     
     unsigned int Rate = 100;               // in Hz - samples/second
     unsigned int Duration = 60;            // in seconds - time each sensor is read
-    unsigned int ReadInterval = 600;        // in seconds - time between reading sessions
+    unsigned int ReadInterval = 600;       // in seconds - time between reading sessions
                                            //  3h = 10800, 1h = 3600, 30 min = 1800, 15 min = 900
                                     
     const byte NADC = 6;                   // number of ADC channels to log
@@ -57,7 +56,7 @@
     DateTime StartTime (2014,5,20,16,30);        //(year,month,day,hour,min) - when data will start to be collected in Mode 2
     long StartTimeUnix = StartTime.unixtime();   //convert StartTime to unix format (seconds since 01/01/1970)
     
-    byte NewFile = 10;                            //create a new file after x sessions
+    byte NewFile = 10;                           //create a new file after x sessions
     
     const char ArduinoID[7] = "GOLIAS";          //ID of the Arduino
     
@@ -66,18 +65,14 @@
     //// FIFO BUFFER VARIABLES  /////////////////////////////////////////////////////////
     
     const size_t FifoSize = 550;                      // FIFO buffer size in bytes
-
     struct Data  {unsigned int adc[NADC];};           // type for data record 
-  
     const size_t NSamples = FifoSize / sizeof(Data);  // number of data records in the FIFO
-  
     NilFIFO <Data, NSamples> DataBuffer;              // declare FIFO buffer
       
  
  
     //// PINS ///////////////////////////////////////////////////////////////////////////
  
-   
     //microSD CS Pin
     const byte chipSelect = 10;     
   
@@ -88,15 +83,14 @@
     //pushbutton
     const byte onButton = 6;
    
-
+   
+   
     //// FILE VARIABLES /////////////////////////////////////////////////////////////////
     
     // SD file system
     SdFat sd;
-    
     //logging file
     SdFile logfile;
-    
     //create a new filename
     char filename[9] = {"000.CSV"};
   
@@ -104,28 +98,23 @@
     
     //// TIME VARIABLES /////////////////////////////////////////////////////////////////
     
-    RTC_DS1307 RTC;                  //the DS1307/DS3232 hardware RTC
-     
+    RTC_DS1307 RTC;                  //the DS1307/DS3232 hardware RTC    
     unsigned long NextLogTime;       //stores the nex log time in unix format
     unsigned long EndTimeUnix;       //will convert the ending time to unix time
-    
     long TimeNowUnix;                //stores the current time in unix format (Sleep functions)
        
     
       
     //// OTHERS /////////////////////////////////////////////////////////////////////////
          
-  
     //button variables
     boolean ButtonPress = 0;           //the button has been pressed?
     boolean ButtonClick = 0;           //the button has been clicked?
     unsigned int PressLimit = 1750;    //in milliseconds - pressing time required until ButtonPress mode is recognized
    
-  
     boolean FirstSleep = 1;
     
     volatile unsigned long Samples=0;
-    
     byte ReadsCounter=0;
    
     
@@ -136,8 +125,8 @@
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
    
    
-    //// ERROR FUNCTION //////////////////////////////////////////////////////////////////////////////
-    //// to let us know if anything goes wrong - it turns on the redLED and prints the error /////////
+    //// ERROR FUNCTION /////////////////////////////////////////////////////////////////////////////////
+    //// to let us know if anything goes wrong - it turns on the redLED and prints the error ////////////
    
     void Error (char *str)  {
              
@@ -236,6 +225,8 @@
            *time = FAT_TIME(now.hour(), now.minute(), now.second()); 
      }
      
+     
+     
      //// GET SETTINGS FUNCTION //////////////////////////////////////////////////////////////////////////
      //// to read SD configuration file and set the variables ////////////////////////////////////////////
     
@@ -325,12 +316,11 @@
          
          
    //// NEW LOG FILE FUNCTION /////////////////////////////////////////////////////////////////////////
-   //// to create a new file and print header informations ////////////////////////////////////////////
+   //// to create a new file and print the header /////////////////////////////////////////////////////
 
-   
     void NewLogFile ()  {
       
-  
+      
            if (ReadsCounter != 0 && ReadsCounter < NewFile)  {return;}
            ReadsCounter=0;
            
@@ -392,7 +382,7 @@
        
                     logfile.print(F("A"));
                     if (i<4)  {logfile.print(i);}
-                    if (i==4 || i==5)  {logfile.print(i+2);}     //A4 and A5 are used by the RTC
+                    if (i==4 || i==5)  {logfile.print(i+2);}    //A4 and A5 are used by the RTC!
                     logfile.print(',');
             }
             
@@ -405,7 +395,7 @@
      
      
    // READ FUNCTION /////////////////////////////////////////////////////////////////////////
-   //// to read and save data, only if it is time to do so ///////////////////////////////////
+   //// to read the data in the ISR (Interrupt Service Routine) /////////////////////////////
    
     void Read() {
        
@@ -417,7 +407,7 @@
              
          for (int i=0; i < NADC; i++)  {
                  if (i<4)  {p -> adc[i] = analogRead(i);}
-                 if (i==4 || i==5)  {p -> adc[i] = analogRead(i+2);}     //A4 and A5 are used by the RTC
+                 if (i==4 || i==5)  {p -> adc[i] = analogRead(i+2);} //A4 and A5 are used by the RTC!
           }
          
          DataBuffer.signalData();
@@ -427,18 +417,17 @@
          digitalWrite(greenLED, LOW);
 
       }
+      
         
    //// LOG FUNCTION /////////////////////////////////////////////////////////////////////////
-   //// to read and save data, only if it is time to do so ///////////////////////////////////
+   //// to save the data to the microSD card /////////////////////////////////////////////////
    
     void Log() {
-        
-                 
-         logfile.open (filename, O_APPEND | O_WRITE);
          
+      
+         logfile.open (filename, O_APPEND | O_WRITE); 
          Samples=0;
          
-   
          FlexiTimer2::start();
          
          while (Samples <= (Rate*Duration))  {
@@ -450,8 +439,7 @@
                  DataBuffer.signalFree();
                  
             }
-  
-  
+ 
          FlexiTimer2::stop();
          
          DateTime now = RTC.now();
@@ -463,7 +451,6 @@
                  for (int i=0; i < NADC; i++)  {logfile.printField(p->adc[i], ',');}
                  logfile.println();
                  DataBuffer.signalFree();
-    
            }
          
          logfile.println();
@@ -478,8 +465,7 @@
          MiniSerial.println();
          
          delay(10);
-        
-              
+                     
   }
             
   
@@ -581,7 +567,7 @@
      SdFile::dateTimeCallback(Date_Time);
      
      
-     //save power
+     //set unused pins to low to reduce power consumption
      pinMode(0, OUTPUT);
      digitalWrite(0, LOW); 
      pinMode(1, OUTPUT);
@@ -598,28 +584,22 @@
      digitalWrite(9, LOW);    
      
      
-     //setting voltage reference
+     //set voltage reference
      analogReference(EXTERNAL);
      
-
+     //check Arduino ID
      CheckID();
-		
+    
      //check number of channels
      if (NADC==0 || NADC>6)  {Error("Incorrect number of channels, check NADC");}
 
      //read settings file
      GetSettings();
      
-     
+     //set the Interrupt     
      if(Rate>1000)  {FlexiTimer2::set(1, 1.0/Rate, Read);}
      else  {FlexiTimer2::set(1000/Rate, Read);}
-    
-     
-     MiniSerial.print(F("Free Ram = "));
-     MiniSerial.println(FreeRam());
-     MiniSerial.println();
-     
-    
+      
  }
  
           
@@ -653,7 +633,7 @@
           
         }
     
-    
+ 
       while (ButtonClick==1)  {Log(); Sleep2();}
              
        
