@@ -26,14 +26,12 @@
  //// LIBRARIES /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
  
-  #include <SdFat.h>
-  #include <SdFatUtil.h>
+  #include <EEPROM.h>
   #include <Wire.h>
   #include <RTClib.h>
+  #include <SdFat.h>
   #include <LowPower.h>
-  #include <EEPROM.h>
   #include <FlexiTimer2.h>
- 
   #include <NilFIFO.h>
   
   
@@ -45,9 +43,9 @@
 
     //// DATA COLLECTING VARIABLES  /////////////////////////////////////////////////////
     
-    unsigned int Rate = 100;               // in Hz - samples/second
+    unsigned int Rate = 500;               // in Hz - samples/second
     unsigned int Duration = 60;            // in seconds - time each sensor is read
-    unsigned int ReadInterval = 600;       // in seconds - time between reading sessions
+    unsigned int ReadInterval = 300;       // in seconds - time between reading sessions
                                            //  3h = 10800, 1h = 3600, 30 min = 1800, 15 min = 900
                                     
     const byte NADC = 6;                   // number of ADC channels to log
@@ -436,7 +434,7 @@
          
          FlexiTimer2::start();
          
-         while (Samples <= (Rate*Duration))  {
+         while (Samples < (Rate*Duration))  {
            
                  Data* p = DataBuffer.waitData(TIME_IMMEDIATE);
                  if (!p) {continue;}
