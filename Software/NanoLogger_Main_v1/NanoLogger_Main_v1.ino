@@ -56,7 +56,7 @@
     DateTime StartTime (2014,5,20,16,30);        //(year,month,day,hour,min) - when data will start to be collected in Mode 2
     long StartTimeUnix = StartTime.unixtime();   //convert StartTime to unix format (seconds since 01/01/1970)
     
-    byte NewFile = 10;                           //create a new file after x sessions
+    byte FileThreshold = 10;                     //create a new file after x sampling events
     
     const char ArduinoID[7] = "GOLIAS";          //ID of the Arduino
     
@@ -213,7 +213,30 @@
               }
   
      }
+          
            
+    
+   //// BUTTON CHECK FUNCTION /////////////////////////////////////////////////////////////////////////  
+   //// to read the pushbutton and recognize the two different pushes - single click or long-time press
+   
+    void ButtonCheck() {
+    
+           int count = 0;  
+           boolean hold = 0;
+          
+           while ((digitalRead(onButton)==HIGH) && (hold==0)) {
+            
+                  delay(10);
+                  count = count+10;
+                  if (count >= PressLimit) {ButtonPress=1; hold=1;} 
+                 
+              }
+           
+           if ((count > 0) && (hold==0)) {ButtonClick=1;}
+          
+     }
+               
+         
      
     //// DATE_TIME FUNCTION //////////////////////////////////////////////////////////////////////////
     //// to return date and time using FAT_DATE macro to format fields ///////////////////////////////
@@ -250,17 +273,18 @@
            byte ST_Minute;
 
             
-           for (byte i=0; i<=4; i++)  {    
+           for (byte i=0; i<=5; i++)  {    
              
                    char line[24];
                    SettingsFile.fgets(line, 24);     // read one line
                    char* p_pos = strchr(line, '=');  // find the '=' position
                    
-                   if(i==0)  { Rate = atoi(p_pos+1);}
-                   if(i==1)  { Duration = atoi(p_pos+1);}
-                   if(i==2)  { ReadInterval = atoi(p_pos+1);}
-                   if(i==3)  { ST_Year = atoi(p_pos+1); ST_Month = atoi(p_pos+7); ST_Day = atoi(p_pos+8);}
-                   if(i==4)  { ST_Hour = atoi(p_pos+1); ST_Minute = atoi(p_pos+5);}
+                   if(i==0)  {Rate = atoi(p_pos+1);}
+                   if(i==1)  {Duration = atoi(p_pos+1);}
+                   if(i==2)  {ReadInterval = atoi(p_pos+1);}
+                   if(i==3)  {ST_Year = atoi(p_pos+1); ST_Month = atoi(p_pos+7); ST_Day = atoi(p_pos+8);}
+                   if(i==4)  {ST_Hour = atoi(p_pos+1); ST_Minute = atoi(p_pos+5);}
+                   if(i==5)  {FileThreshold = atoi(p_pos+1);}
            }
            
           
@@ -287,33 +311,15 @@
            MiniSerial.print(StartTime.minute(), DEC);
            MiniSerial.println();
            
+           MiniSerial.print(F("FileThreshold = "));
+           MiniSerial.println(FileThreshold);
+           
            if (Rate==0 || Duration==0 || ReadInterval==0) {Error("Error in settings file variables");}
                  
     }
       
  
-
-   //// BUTTON CHECK FUNCTION /////////////////////////////////////////////////////////////////////////  
-   //// to read the pushbutton and recognize the two different pushes - single click or long-time press
-   
-    void ButtonCheck() {
-    
-           int count = 0;  
-           boolean hold = 0;
-          
-           while ((digitalRead(onButton)==HIGH) && (hold==0)) {
-            
-                  delay(10);
-                  count = count+10;
-                  if (count >= PressLimit) {ButtonPress=1; hold=1;} 
-                 
-              }
-           
-           if ((count > 0) && (hold==0)) {ButtonClick=1;}
-          
-     }
-         
-         
+       
          
    //// NEW LOG FILE FUNCTION /////////////////////////////////////////////////////////////////////////
    //// to create a new file and print the header /////////////////////////////////////////////////////
@@ -321,7 +327,7 @@
     void NewLogFile ()  {
       
       
-           if (ReadsCounter != 0 && ReadsCounter < NewFile)  {return;}
+           if (ReadsCounter != 0 && ReadsCounter < FileThreshold)  {return;}
            ReadsCounter=0;
            
            //get time
