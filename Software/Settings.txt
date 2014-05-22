@@ -1,0 +1,13 @@
+Rate = 500
+Duration = 60
+ReadInterval = 300
+StartDate = 2014/05/22
+StartTime = 15:30
+FileThreshold = 10
+
+Rate in Hz, samples/second (up to 3000).
+Duration in seconds, time each sensor is read.
+ReadInterval in seconds, time between reading sessions.
+StartDate: (yyyy/mm/dd)
+StartTime: (hh:mm)
+FileThreshold - create a new file after x sampling events 
