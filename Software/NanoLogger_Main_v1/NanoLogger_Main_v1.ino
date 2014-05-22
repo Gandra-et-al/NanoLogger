@@ -56,7 +56,7 @@
     DateTime StartTime (2014,5,20,16,30);        //(year,month,day,hour,min) - when data will start to be collected in Mode 2
     long StartTimeUnix = StartTime.unixtime();   //convert StartTime to unix format (seconds since 01/01/1970)
     
-    byte FileThreshold = 10;                     //create a new file after x sampling events
+    int FileThreshold = 10;                     //create a new file after x sampling events
     
     const char ArduinoID[7] = "GOLIAS";          //ID of the Arduino
     
