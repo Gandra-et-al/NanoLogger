@@ -38,7 +38,7 @@
   #include <Adafruit_MAX31855.h>
   
   
- //Clock pre-scaling to save power
+  //Clock pre-scaling to save power
   #define Set_prescaler(x)   (CLKPR = (1<<CLKPCE),CLKPR = x) 
   const byte Prescaler = 2; 
   //Prescaler=0 ---> 16MHz (default)
