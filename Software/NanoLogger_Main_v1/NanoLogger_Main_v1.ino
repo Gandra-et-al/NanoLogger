@@ -43,8 +43,8 @@
 
     //// DATA COLLECTING VARIABLES  /////////////////////////////////////////////////////
     
-    unsigned int Rate = 500;               // in Hz - samples/second
-    unsigned int Duration = 60;            // in seconds - time each sensor is read
+    unsigned long Rate = 500;               // in Hz - samples/second
+    unsigned long Duration = 60;            // in seconds - time each sensor is read
     unsigned int ReadInterval = 300;       // in seconds - time between reading sessions
                                            //  3h = 10800, 1h = 3600, 30 min = 1800, 15 min = 900
                                     
@@ -62,7 +62,7 @@
     
     //// FIFO BUFFER VARIABLES  /////////////////////////////////////////////////////////
     
-    const size_t FifoSize = 550;                      // FIFO buffer size in bytes
+    const size_t FifoSize = 560;                      // FIFO buffer size in bytes
     struct Data  {unsigned int adc[NADC];};           // type for data record 
     const size_t NSamples = FifoSize / sizeof(Data);  // number of data records in the FIFO
     NilFIFO <Data, NSamples> DataBuffer;              // declare FIFO buffer
@@ -488,7 +488,9 @@
        
                MiniSerial.println(F("Sleeping..."));
             
-               for (int i=0; i<(TimeLeft-2); i++)  {LowPower.powerDown(SLEEP_1S, ADC_ON, BOD_OFF);}
+               for (int i=0; i<(TimeLeft-2); i++)  {LowPower.powerDown(SLEEP_1S, ADC_OFF, BOD_OFF);}
+               
+               analogRead(0);
                
                while(TimeNowUnix < StartTimeUnix)  {DateTime now = RTC.now(); TimeNowUnix = now.unixtime();}
           
@@ -515,8 +517,10 @@
                 DateTime now = RTC.now();
                 TimeNowUnix = now.unixtime();
                 if(TimeNowUnix >= (NextLogTime-2))  {break;}
-                LowPower.powerDown(SLEEP_1S, ADC_ON, BOD_OFF);
+                LowPower.powerDown(SLEEP_1S, ADC_OFF, BOD_OFF);
               }
+              
+          analogRead(0);
           
           NewLogFile();
            
