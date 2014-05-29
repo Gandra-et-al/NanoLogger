@@ -44,8 +44,8 @@
     //// DATA COLLECTING VARIABLES  /////////////////////////////////////////////////////
     
     unsigned long Rate = 500;               // in Hz - samples/second
-    unsigned long Duration = 60;            // in seconds - time each sensor is read
-    unsigned int ReadInterval = 300;       // in seconds - time between reading sessions
+    unsigned long LogDuration = 60;            // in seconds - time each sensor is read
+    unsigned int SleepDuration = 300;       // in seconds - time between reading sessions
                                            //  3h = 10800, 1h = 3600, 30 min = 1800, 15 min = 900
                                     
     const byte NADC = 6;                   // number of ADC channels to log
@@ -278,8 +278,8 @@
                    char* p_pos = strchr(line, '=');  // find the '=' position
                    
                    if(i==0)  {Rate = atoi(p_pos+1);}
-                   if(i==1)  {Duration = atoi(p_pos+1);}
-                   if(i==2)  {ReadInterval = atoi(p_pos+1);}
+                   if(i==1)  {LogDuration = atoi(p_pos+1);}
+                   if(i==2)  {SleepDuration = atoi(p_pos+1);}
                    if(i==3)  {ST_Year = atoi(p_pos+1); ST_Month = atoi(p_pos+7); ST_Day = atoi(p_pos+8);}
                    if(i==4)  {ST_Hour = atoi(p_pos+1); ST_Minute = atoi(p_pos+5);}
                    if(i==5)  {FileThreshold = atoi(p_pos+1);}
@@ -292,10 +292,10 @@
            
            MiniSerial.print(F("Rate = "));
            MiniSerial.println(Rate);
-           MiniSerial.print(F("Duration = "));
-           MiniSerial.println(Duration);
-           MiniSerial.print(F("ReadInterval = "));
-           MiniSerial.println(ReadInterval);
+           MiniSerial.print(F("LogDuration = "));
+           MiniSerial.println(LogDuration);
+           MiniSerial.print(F("SleepDuration = "));
+           MiniSerial.println(SleepDuration);
            
            MiniSerial.print(F("Start Time = "));
            MiniSerial.print(StartTime.year(), DEC);
@@ -312,7 +312,7 @@
            MiniSerial.print(F("FileThreshold = "));
            MiniSerial.println(FileThreshold);
            
-           if (Rate==0 || Duration==0 || ReadInterval==0) {Error("Error in settings file variables");}
+           if (Rate==0 || LogDuration==0 || SleepDuration==0) {Error("Error in settings file variables");}
                  
     }
       
@@ -375,10 +375,10 @@
              
            logfile.print(F("Rate (Hz): "));
            logfile.println(Rate);
-           logfile.print(F("Duration (s): "));
-           logfile.println(Duration);
-           logfile.print(F("ReadInterval (s): "));
-           logfile.println(ReadInterval);
+           logfile.print(F("LogDuration (s): "));
+           logfile.println(LogDuration);
+           logfile.print(F("SleepDuration (s): "));
+           logfile.println(SleepDuration);
            logfile.println();
            
      
@@ -434,7 +434,7 @@
          
          FlexiTimer2::start();
          
-         while (Samples < (Rate*Duration))  {
+         while (Samples < (Rate*LogDuration))  {
            
                  Data* p = DataBuffer.waitData(TIME_IMMEDIATE);
                  if (!p) {continue;}
@@ -508,11 +508,11 @@
     
     void Sleep2 () {
       
-          NextLogTime = EndTimeUnix + ReadInterval;
+          NextLogTime = EndTimeUnix + SleepDuration;
      
           MiniSerial.println(F("Sleeping..."));
           
-          for (int i=0; i<ReadInterval; i++)  {
+          for (int i=0; i<SleepDuration; i++)  {
                 
                 DateTime now = RTC.now();
                 TimeNowUnix = now.unixtime();
