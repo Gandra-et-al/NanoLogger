@@ -1,13 +1,14 @@
-Rate = 500
-LogDuration = 60
-SleepDuration = 300
-StartDate = 2014/05/22
-StartTime = 15:30
+Rate = 1
+LogDuration = 10
+SleepDuration = 10
+StartDate = 2014-05-31
+StartTime = 16:30
 FileThreshold = 10
 
-Rate in Hz, samples/second (up to 3000).
+/// INSTRUCTIONS ///
+Rate in Hz, samples/second (up to 3000)
 LogDuration in seconds
 SleepDuration in seconds
-StartDate: (yyyy/mm/dd)
-StartTime: (hh:mm)
-FileThreshold - create a new file after x sampling events 
+StartDate: (yyyy-mm-dd)
+StartTime: (hh:mm, 24 hours format)
+FileThreshold - generate a new file after x sampling sessions
